@@ -180,20 +180,23 @@ function createCollectable(x, y) {
 // function calls executeLoss(). If a monster falls off the screen, it is
 // removed from the game.
 function applyGravity() {
-
+  player.velocity.y += GRAVITY;
 }
 
 // Called in the draw() function. Continuously checks for collisions and overlaps
 // between all relevant game objects. Depending on the collision or overlap that
 // occurs, a specific callback function is run.
 function checkCollisions() {
-
+  player.collide(platforms, platformCollision);
 }
 
 // Callback function that runs when the player or a monster collides with a
 // platform.
 function platformCollision(sprite, platform) {
-
+  if(sprite === player && sprite.touching.bottom) {
+    sprite.velocity.y = 0;
+    playerGrounded = true;
+  }
 }
 
 // Callback function that runs when the player collides with a monster.
@@ -210,6 +213,10 @@ function getCollectable(player, collectable) {
 // all of the relevant "check" functions below.
 function updatePlayer() {
   //console.log("Player x: " + player.position.x + " Player y: " + player.position.y);
+  checkIdle();
+  checkFalling();
+  checkJumping();
+  checkMovingLeftRight();
 
 }
 
@@ -217,7 +224,10 @@ function updatePlayer() {
 // player is grounded, set player's animation to "idle", and change her
 // x velocity to 0.
 function checkIdle() {
-
+  if(!keyIsDown(LEFT_ARROW) || !keyIsDown(RIGHT_ARROW)){
+    player.velocity.x = 0;
+    player.changeAnimation("idle");
+  }
 }
 
 // Check if the player is falling. If she is not grounded and her y velocity is
@@ -238,6 +248,20 @@ function checkJumping() {
 // left or right according to DEFAULT_VELOCITY. Also be sure to mirror the
 // player's sprite left or right to avoid "moonwalking".
 function checkMovingLeftRight() {
+  if(keyIsDown(LEFT_ARROW) && !keyIsDown(RIGHT_ARROW)) {
+    player.mirrorX(-1);
+    if(playerGrounded) {
+      player.changeAnimation("run");
+    }
+    player.velocity.x = -DEFAULT_VELOCITY;
+  }
+  else if(keyIsDown(RIGHT_ARROW) && !keyIsDown(LEFT_ARROW)) {
+    player.mirrorX(1);
+    if(playerGrounded) {
+      player.changeAnimation("run");
+    }
+    player.velocity.x = DEFAULT_VELOCITY;
+  }
 
 }
 
